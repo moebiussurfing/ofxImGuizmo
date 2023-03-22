@@ -1,0 +1,13 @@
+
+example/example.vcxproj.user
+example/example.vcxproj.filters
+example/example.vcxproj
+example/example.sln
+example/bin/FreeImage.dll
+example/bin/fmodexL64.dll
+example/bin/fmodex64.dll
+example/bin/example.lib
+example/bin/example.exp
+example/bin/example.exe
+example/bin/imgui.ini
+example/icon.rc

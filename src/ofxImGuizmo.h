@@ -1,6 +1,10 @@
 #pragma once
 
+#define IMGUI_DEFINE_MATH_OPERATORS // Access to math operators
+#include "imgui_internal.h"
+
 #include "ofxImGui.h"
+
 #include "ImGuizmo.h"
 #include "ofCamera.h"
 #include "ofNode.h"
