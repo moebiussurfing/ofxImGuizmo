@@ -1,3 +1,11 @@
+A modified version of the addon from @nariakiiwatani: https://github.com/nariakiiwatani/ofxImGuizmo
+- No submodules. Lib copied to `/libs`.
+- Offset translation fix.
+- Added Helpers
+- New example `example-ImGuizmo`.
+
+------
+
 # ofxImGuizmo
 
 an openFrameworks wrapper of [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
