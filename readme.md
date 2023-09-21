@@ -5,6 +5,8 @@ https://github.com/nariakiiwatani/ofxImGuizmo
 - Added Helpers for simpler API with OF.
 - New example `example-ImGuizmo`.
 
+![image](https://github.com/moebiussurfing/ofxImGuizmo/assets/2106149/b1278713-3bd2-40e8-9a6f-ec51e36838b2)
+
 ------
 
 # ofxImGuizmo
