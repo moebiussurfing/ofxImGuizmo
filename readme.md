@@ -1,7 +1,8 @@
-A modified version of the addon from @nariakiiwatani: https://github.com/nariakiiwatani/ofxImGuizmo
+A modified version of the addon from @nariakiiwatani:  
+https://github.com/nariakiiwatani/ofxImGuizmo
 - No submodules. Lib copied to `/libs`.
 - Offset translation fix.
-- Added Helpers
+- Added Helpers for simpler API with OF.
 - New example `example-ImGuizmo`.
 
 ------
