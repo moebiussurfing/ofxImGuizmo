@@ -82,6 +82,8 @@ namespace ImGuizmo
 
 // @moebiusSurfing OF Helpers
 
+// To draw a gizmo into an OF camera viewport.
+
 namespace ImGuizmo
 {
 	// Draws guizmo for the node into the camera with edit modes.
@@ -90,19 +92,6 @@ namespace ImGuizmo
 		{
 			ImGuizmo::BeginFrame();
 			ImGuizmo::Manipulate(camera, node, op, mode);
-			//auto mat = node->getLocalTransformMatrix();
-			//if (ImGuizmo::Manipulate(camera, mat, op, node)) {
-			//	glm::mat4 transformation;
-			//	glm::vec3 scale;
-			//	glm::quat rotation;
-			//	glm::vec3 translation;
-			//	glm::vec3 skew;
-			//	glm::vec4 perspective;
-			//	glm::decompose(mat, scale, rotation, translation, skew, perspective);
-			//	node->setPosition(translation);
-			//	node->setScale(scale);
-			//	node->setOrientation(rotation);
-			//}
 		}
 		gui_->end();
 	}

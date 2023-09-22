@@ -53,6 +53,9 @@ static int gizmoCount = 4;
 static float camDistance = 8.f;
 static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 
+static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
+
+
 static float objectMatrix[4][16] = {
   { 1.f, 0.f, 0.f, 0.f,
     0.f, 1.f, 0.f, 0.f,
@@ -213,7 +216,7 @@ static inline void rotationY(const float angle, float* m16)
 
 static void EditTransform(float* cameraView, float* cameraProjection, float* matrix, bool editTransformDecomposition)
 {
-   static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
+   //static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
    static bool useSnap = false;
    static float snap[3] = { 1.f, 1.f, 1.f };
    static float bounds[] = { -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f };
@@ -306,12 +309,16 @@ static void EditTransform(float* cameraView, float* cameraProjection, float* mat
       ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
    }
 
+   // floor
    ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
 
+   // cube
    ImGuizmo::DrawCubes(cameraView, cameraProjection, &objectMatrix[0][0], gizmoCount);
    
+   // gizmo
    ImGuizmo::Manipulate(cameraView, cameraProjection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 
+   // top right view modifier
    ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 
    if (useWindow)
@@ -321,7 +328,132 @@ static void EditTransform(float* cameraView, float* cameraProjection, float* mat
    }
 }
 
+//----
+
+// Other extra widgets
+
+#ifndef USE_ONLY_GIZMOS
+
+#if 0
+// Example image ZoomSlider
+// build a procedural texture. 
+
+// .h
+// Copy/pasted and adapted from 
+// https://rosettacode.org/wiki/Plasma_effect#Graphics_version
+unsigned int procTexture;
+uint32_t* tempBitmap = new uint32_t[256 * 256];
+int index = 0;
+
+// setup
+{
+    // texture containers
+    glGenTextures(1, &procTexture);
+    glBindTexture(GL_TEXTURE_2D, procTexture);
+
+    // create texture for zoom slider
+    for (int y = 0; y < 256; y++)
+    {
+        for (int x = 0; x < 256; x++)
+        {
+            float dx = x + .5f;
+            float dy = y + .5f;
+            float dv = sinf(x * 0.02f) + sinf(0.03f * (x + y)) + sinf(sqrtf(0.4f * (dx * dx + dy * dy) + 1.f));
+
+            tempBitmap[index] = 0xFF000000 +
+                (int(255 * fabsf(sinf(dv * 3.141592f))) << 16) +
+                (int(255 * fabsf(sinf(dv * 3.141592f + 2 * 3.141592f / 3))) << 8) +
+                (int(255 * fabs(sin(dv * 3.141592f + 4.f * 3.141592f / 3.f))));
+
+            index++;
+        }
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, tempBitmap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    delete[] tempBitmap;
+}
+
+// draw
+{
+    ImGui::SetNextWindowPos(ImVec2(10, 350), ImGuiCond_Appearing);
+
+    ImGui::SetNextWindowSize(ImVec2(940, 480), ImGuiCond_Appearing);
+    ImGui::Begin("Other controls");
+
+    if (ImGui::CollapsingHeader("Zoom Slider"))
+    {
+        static float uMin = 0.4f, uMax = 0.6f;
+        static float vMin = 0.4f, vMax = 0.6f;
+        ImGui::Image((ImTextureID)(uint64_t)procTexture, ImVec2(900, 300), ImVec2(uMin, vMin), ImVec2(uMax, vMax));
+        {
+            ImGui::SameLine();
+            ImGui::PushID(18);
+            ImZoomSlider::ImZoomSlider(0.f, 1.f, vMin, vMax, 0.01f, ImZoomSlider::ImGuiZoomSliderFlags_Vertical);
+            ImGui::PopID();
+        }
+
+        {
+            ImGui::PushID(19);
+            ImZoomSlider::ImZoomSlider(0.f, 1.f, uMin, uMax);
+            ImGui::PopID();
+        }
+    }
+}
+
+#endif
+
+//--
+
 #ifdef USE_Sequencer
+
+#if 0
+
+// Sequencer
+
+// .h
+MySequence mySequence;
+
+// setup
+// sequence with default values
+{
+    mySequence.mFrameMin = -100;
+    mySequence.mFrameMax = 1000;
+    mySequence.myItems.push_back(MySequence::MySequenceItem{ 0, 10, 30, false });
+    mySequence.myItems.push_back(MySequence::MySequenceItem{ 1, 20, 30, true });
+    mySequence.myItems.push_back(MySequence::MySequenceItem{ 3, 12, 60, false });
+    mySequence.myItems.push_back(MySequence::MySequenceItem{ 2, 61, 90, false });
+    mySequence.myItems.push_back(MySequence::MySequenceItem{ 4, 90, 99, false });
+}
+
+// draw
+{
+    if (ImGui::CollapsingHeader("Sequencer"))
+    {
+        // let's create the sequencer
+        static int selectedEntry = -1;
+        static int firstFrame = 0;
+        static bool expanded = true;
+        static int currentFrame = 100;
+
+        ImGui::PushItemWidth(130);
+        ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+        ImGui::SameLine();
+        ImGui::InputInt("Frame ", &currentFrame);
+        ImGui::SameLine();
+        ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+        ImGui::PopItemWidth();
+        Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+        // add a UI to edit that particular item
+        if (selectedEntry != -1)
+        {
+            const MySequence::MySequenceItem& item = mySequence.myItems[selectedEntry];
+            ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
+            // switch (type) ....
+        }
+    }
+}
+#endif
+
 //
 //
 // ImSequencer interface
@@ -523,7 +655,43 @@ struct MySequence : public ImSequencer::SequenceInterface
 };
 #endif
 
+//--
+
 #ifdef USE_GraphEditor
+
+#ifdef 0
+// Graph Editor
+static GraphEditor::Options options;
+static GraphEditorDelegate delegate;
+static GraphEditor::ViewState viewState;
+static GraphEditor::FitOnScreen fit = GraphEditor::Fit_None;
+static bool showGraphEditor = true;
+
+if (ImGui::CollapsingHeader("Graph Editor"))
+{
+    ImGui::Checkbox("Show GraphEditor", &showGraphEditor);
+    GraphEditor::EditOptions(options);
+}
+
+if (showGraphEditor)
+{
+    ImGui::Begin("Graph Editor", NULL, 0);
+    if (ImGui::Button("Fit all nodes"))
+    {
+        fit = GraphEditor::Fit_AllNodes;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Fit selected nodes"))
+    {
+        fit = GraphEditor::Fit_SelectedNodes;
+    }
+    GraphEditor::Show(delegate, options, viewState, true, &fit);
+
+    ImGui::End();
+}
+#endif
+
+
 //
 //
 // GraphEditor interface
@@ -693,3 +861,4 @@ struct GraphEditorDelegate : public GraphEditor::Delegate
 
 #endif
 
+#endif
