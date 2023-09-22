@@ -23,9 +23,10 @@ void ofApp::update() {
 void ofApp::drawDebug() {
 	string s = "";
 	s += "\n";
-	s += "KEYS: \ne | r | t\n";
+	s += "KEYS\n\n";
 	s += "BACKSPACE: Reset\n";
 	s += "\n";
+	s += "E, R, T:\n";
 	switch (op_)
 	{
 	case ImGuizmo::TRANSLATE:
@@ -39,10 +40,13 @@ void ofApp::drawDebug() {
 		break;
 	}
 	s += "\n\n";
-	s += "Transformation:\n" + ofToString(node_.getGlobalTransformMatrix()) + "\n";
-	s += "Scale:\n" + ofToString(node_.getGlobalScale()) + "\n";
-	s += "Rotation:\n" + ofToString(node_.getGlobalOrientation()) + "\n";
-	s += "\n";
+	s += "Transformation:\n" + ofToString(node_.getGlobalTransformMatrix());
+	s += "\n\n";
+	s += "Scale:\n" + ofToString(node_.getGlobalScale());
+	s += "\n\n";
+	s += "Rotation:\n" + ofToString(node_.getGlobalOrientation());
+	s += "\n\n";
+	s += "SPACE:\nMODE ";
 	if (mode_ == ImGuizmo::LOCAL) s += "LOCAL\n";
 	else if (mode_ == ImGuizmo::WORLD) s += "WORLD\n";
 	ofDrawBitmapStringHighlight(s, 10, 20);
@@ -57,20 +61,21 @@ void ofApp::draw()
 
 	cam_.begin();
 	{
+		//node_.draw();
+
 		// Applies the node's transformation matrix
-		ImGuizmo::beginGuizmoTransform(&node_);
+		ImGuizmo::beginGuizmoTransform(node_);
 		{
 			ofPushStyle();
 			ofNoFill();
 			ofDrawBox(25);
-			//node_.draw();
 			ofPopStyle();
 		}
 		ImGuizmo::endGuizmoTransform();
 	}
 	cam_.end();
 
-	ImGuizmo::drawImGuizmo(&gui_, &cam_, &node_, op_, mode_);
+	ImGuizmo::drawImGuizmo(&gui_, cam_, node_, op_, mode_);
 }
 
 //--------------------------------------------------------------
@@ -89,54 +94,4 @@ void ofApp::keyPressed(int key) {
 		node_.setOrientation(glm::quat{ 0,0,0,0 });
 	}break;
 	}
-}
-
-//--------------------------------------------------------------
-void ofApp::keyReleased(int key) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo) {
-
 }

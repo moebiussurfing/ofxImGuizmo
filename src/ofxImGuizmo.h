@@ -1,6 +1,6 @@
 #pragma once
 
-#define IMGUI_DEFINE_MATH_OPERATORS // Access to math operators
+#define IMGUI_DEFINE_MATH_OPERATORS 
 #include "imgui_internal.h"
 
 #include "ofxImGui.h"
@@ -35,28 +35,23 @@ namespace {
 		node.setGlobalOrientation(rotation);
 		node.setScale(scale / (node.getParent() ? node.getParent()->getGlobalScale() : glm::vec3{ 1,1,1 }));
 	}
-	//static ofRectangle getContentRect() {
-	//	using namespace ImGui;
-	//	return {
-	//		GetWindowPos().x,
-	//		GetWindowPos().y,
-	//		GetWindowWidth(),
-	//		GetWindowHeight()
-	//	};
-	//}
-	static ofRectangle getContentRect() {
-		return ofGetCurrentViewport();
+	static ofRectangle getViewport(const ofCamera& cam) {
+		class MyCamera : public ofCamera {
+		public:
+			MyCamera(const ofCamera& cam) :ofCamera(cam) {}
+			using ofCamera::getViewport;
+		};
+		return MyCamera(cam).getViewport();
 	}
 }
 
 namespace ImGuizmo
 {
 	static bool Manipulate(const ofCamera& camera, glm::mat4& matrix, OPERATION operation, MODE mode, const ofRectangle* viewvolume = nullptr, glm::mat4* delta_matrix = nullptr, const float* snap = nullptr, const float* localBounds = nullptr, const float* boundsSnap = nullptr) {
-		ImGuiIO& io = ImGui::GetIO();
-		auto contentRect = getContentRect();
-		ImGuizmo::SetRect(contentRect.x, contentRect.y, contentRect.width, contentRect.height);
+		auto viewport = viewvolume ? *viewvolume : getViewport(camera);
+		ImGuizmo::SetRect(viewport.x, viewport.y, viewport.width, viewport.height);
 		auto view = glm::inverse(camera.getGlobalTransformMatrix());
-		auto proj = viewvolume ? camera.getProjectionMatrix(*viewvolume) : camera.getProjectionMatrix();
+		auto proj = camera.getProjectionMatrix(viewport);
 		ImGuizmo::SetOrthographic(camera.getOrtho());
 		return ImGuizmo::Manipulate(&view[0][0], &proj[0][0], operation, mode, &matrix[0][0], delta_matrix ? &((*delta_matrix)[0][0]) : nullptr, snap, localBounds, boundsSnap);
 	}
@@ -81,38 +76,41 @@ namespace ImGuizmo
 		}
 		return false;
 	}
+}
 
-	//--
+//--
 
-	// OF Helpers
+// @moebiusSurfing OF Helpers
 
+namespace ImGuizmo
+{
 	// Draws guizmo for the node into the camera with edit modes.
-	static inline void drawImGuizmo(ofxImGui::Gui* gui_, ofCamera* cam_, ofNode* node_, ImGuizmo::OPERATION op_ = ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE mode_ = ImGuizmo::MODE::LOCAL) {
+	static inline void drawImGuizmo(ofxImGui::Gui* gui_, const ofCamera& camera, ofNode& node, ImGuizmo::OPERATION op = ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE mode = ImGuizmo::MODE::LOCAL) {
 		gui_->begin();
 		{
 			ImGuizmo::BeginFrame();
-			auto mat = node_->getLocalTransformMatrix();
-			ofCamera& camRef = *cam_;
-			if (ImGuizmo::Manipulate(camRef, mat, op_, mode_)) {
-				glm::mat4 transformation;
-				glm::vec3 scale;
-				glm::quat rotation;
-				glm::vec3 translation;
-				glm::vec3 skew;
-				glm::vec4 perspective;
-				glm::decompose(mat, scale, rotation, translation, skew, perspective);
-				node_->setPosition(translation);
-				node_->setScale(scale);
-				node_->setOrientation(rotation);
-			}
+			ImGuizmo::Manipulate(camera, node, op, mode);
+			//auto mat = node->getLocalTransformMatrix();
+			//if (ImGuizmo::Manipulate(camera, mat, op, node)) {
+			//	glm::mat4 transformation;
+			//	glm::vec3 scale;
+			//	glm::quat rotation;
+			//	glm::vec3 translation;
+			//	glm::vec3 skew;
+			//	glm::vec4 perspective;
+			//	glm::decompose(mat, scale, rotation, translation, skew, perspective);
+			//	node->setPosition(translation);
+			//	node->setScale(scale);
+			//	node->setOrientation(rotation);
+			//}
 		}
 		gui_->end();
 	}
 
 	// Applies the node's transformation matrix
-	static inline void beginGuizmoTransform(ofNode* node_) {
+	static inline void beginGuizmoTransform(ofNode& node) {
 		ofPushMatrix();
-		node_->transformGL();
+		node.transformGL();
 	}
 	static inline void endGuizmoTransform() {
 		ofPopMatrix();
