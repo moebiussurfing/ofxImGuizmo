@@ -4,4 +4,4 @@ https://github.com/nariakiiwatani/ofxImGuizmo
 - Added Helpers for simpler API with OF.
 - New example `example_2`.
 
-![](example_2/Capture.png)
+![](/example_2/Capture.png)
