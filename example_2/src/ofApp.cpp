@@ -1,7 +1,6 @@
 #include "ofApp.h"
 #include <glm/gtx/matrix_decompose.hpp>
 
-
 //--------------------------------------------------------------
 void ofApp::setup() {
 	gui_.setup();
@@ -29,15 +28,9 @@ void ofApp::drawDebug() {
 	s += "E, R, T:\n";
 	switch (op_)
 	{
-	case ImGuizmo::TRANSLATE:
-		s += "TRANSLATE";
-		break;
-	case ImGuizmo::ROTATE:
-		s += "ROTATE";
-		break;
-	case ImGuizmo::SCALE:
-		s += "SCALE";
-		break;
+	case ImGuizmo::TRANSLATE: s += "TRANSLATE"; break;
+	case ImGuizmo::ROTATE: s += "ROTATE"; break;
+	case ImGuizmo::SCALE: s += "SCALE"; break;
 	}
 	s += "\n\n";
 	s += "Transformation:\n" + ofToString(node_.getGlobalTransformMatrix());
